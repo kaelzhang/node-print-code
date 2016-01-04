@@ -1,7 +1,7 @@
 {
   "name": "print-code",
   "version": "1.0.0",
-  "description": "print-code",
+  "description": "Print visualized slice of code from its content, line and column for CLI",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec ./test/*.js"
@@ -11,7 +11,13 @@
     "url": "git://github.com/kaelzhang/node-print-code.git"
   },
   "keywords": [
-    "print-code"
+    "print-code",
+    "visualize",
+    "visualization",
+    "cli",
+    "command-line",
+    "code",
+    "slice"
   ],
   "engines": {
     "node": ">=0.10.0"
@@ -24,5 +30,8 @@
   "devDependencies": {
     "mocha": "*",
     "chai": "*"
+  },
+  "dependencies": {
+    "chalk": "^1.1.1"
   }
 }

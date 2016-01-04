@@ -11,7 +11,7 @@
 
 # print-code
 
-<!-- description -->
+Print visualized slice of code from its content, line and column for CLI.
 
 ## Install
 
@@ -22,8 +22,37 @@ $ npm install print-code --save
 ## Usage
 
 ```js
-var print_code = require('print-code');
+var code = require('print-code');
+code(content)
+  .line(10, 14)
+  .highlight(line, column)
+  .point(12, column)
+  .print()
 ```
+
+#### .line([from] [, to])
+
+Specify which lines should be printed.
+
+- **from** `Number=` The line number begins to be printed, and the value will be `parseInt()`ed. If not specified, it will print all lines. If 
+- **to** `Number=` If not specified, it will only print the line of `from`
+
+```js
+code(content).line().print();       // print all code
+code(content).line(10).print();     // print line 10
+code(content).line(10, 20).print(); // print lines from [10, 20)
+```
+
+Special cases:
+
+```js
+code(content).line(-1, 10).print(); // will print lines from [0, 10)
+code(content).line(0, -1).print();  // will print lines except for the last line.
+code(content).line(10, 9);          // will only print line 10
+code(content).line(10, 11);         // will print line 10
+```
+
+#### .highlight(line)
 
 ## License
 
