@@ -26,7 +26,7 @@ var code = require('print-code');
 code(content)
   .line(10, 14)
   .highlight(line, column)
-  .point(12, column)
+  .mark(12, column)
   .print()
 ```
 
@@ -53,6 +53,16 @@ code(content).line(10, 11);         // will print line 10
 ```
 
 #### .highlight(line)
+
+#### .style()
+
+#### .mark()
+
+#### .print()
+
+#### .print_line()
+
+#### .get()
 
 ## License
 
