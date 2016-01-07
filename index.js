@@ -2,32 +2,30 @@
 
 module.exports = code
 code.Code = Code
+code.generate = generate
+
+const chalk = require('chalk')
+const set = require('set-options')
+const make_array = require('make-array')
 
 
-function code (content, options = {}) {
-  return new Code(content, options)
-}
-
-
-function Code (content, options) {
-  this.content = content
-  this.options = options
-
-  ['highlight', 'mark', 'line'].forEach(
-    key => this[key](options[key])
-  )
-}
-
-
-function format_exception (err, content, matched) {
+// @param {Object} options
+// - line: [from, to]
+// - mark: []
+// - highlight: []
+function generate (content, options) {
   var lines = content.split('\n')
-  var line_start = Math.max(0, matched.line - 3)
-  var line_end = Math.min(lines.length, matched.line + 3)
+  
 
+  
+
+  var MAX_COLUMNS = options.column_max
+  
   var message = 
     lines
     .slice(line_start, line_end)
     .map(function (line, index) {
+      // line number
       var no = index + line_start
       var no_length = (no + '').length
       var mark = ''
@@ -98,45 +96,180 @@ function format_exception (err, content, matched) {
           + 'column: ' + column
       }
 
-      // spaces
-      return Array(5 + 1 - no_length).join(' ')
-        + no
-        + '| '
-        + line_string
-        + mark
+      
     })
     .join('\n')
 
-  err.message = err.message + '\n\n' + message + '\n'
-  return err
+  return message
+}
+
+
+function code (content) {
+  return new Code(content)
+}
+
+
+function Code (content) {
+  this.codes = content
+    .split('\n')
+    .map(
+      (code, index) => {
+        code: code,
+        index: index
+      }
+    )
+  this.options = {}
 }
 
 
 Code.prototype.get = function() {
-  // body...
+  this._clean_options()
+
+  var lines = this.codes
+  var options = this.options
+
+  if (options.slice) {
+    lines = lines.slice.apply(lines, options.slice)
+  }
+
+  return lines.map(
+      line => this._format_line(line.index, line.code)
+    )
+}
+
+
+const DEFAULT_COLOR_PALETTE = {
+  highlight_no: function (str) {
+    return chalk.red(str)
+  }
+}
+
+Code.prototype._clean_options = function() {
+  this.options.colors = set(this.options.colors, DEFAULT_COLOR_PALETTE)
+}
+
+
+Code.prototype._format_line = function(no, content) {
+  const options = this.options
+  const max_columns = options.max_columns || process.stdout.columns - 1
+
+  // 5: line no
+  // 1: |
+  // 1: whitespace  
+  const max_content = max_columns - 7
+  var length = content.length
+
+  if (!options.mark) {
+    
+  }
+
+  
+
+
+}
+
+
+function whitespaces (n) {
+  return Array(n + 1).join(' ')
+}
+
+// format cleaned components
+Code.prototype._format_components = function(no, content, mark) {
+  var no_length = ('' + no).length
+
+  mark = mark
+    ? '\n' + mark
+    : ''
+
+  // spaces
+  return whitespaces(5 - no_length)
+    + this._format_line_no(no)
+    + '| '
+    + content
+    + mark
+}
+
+
+// format line number
+Code.prototype._format_line_no = function(no) {
+  var highlight = this.options.highlight
+
+  if (!highlight || !~highlight.indexOf(no)) {
+    return no
+  }
+
+  return this.options.colors.highlight_no(no)
+}
+
+
+// @param {Number} exp_length The expected length of the result
+Code.prototype._slice_content = function(content, start, exp_length) {
+  var length = content.length
+  var slice_length = exp_length
+  var result = 'n'
+
+  if (start > 0) {
+
+    // ...(whitespace)
+    slice_length -= 4
+    result = '... ' + result
+  }
+
+  if (start + exp_length > length) {
+    slice_length -= 4
+    result += ' ...'
+  }
+
+  return result.replace('n', content.substr(start, slice_length))
 }
 
 
 Code.prototype.print = function() {
-  // body...
+  this.print_line()
+  this._output('\n')
 }
 
 
 Code.prototype.print_line = function() {
-  // body...
+  this._output(this.get())
 }
 
 
-Code.prototype.highlight = function(first_argument) {
+Code.prototype._output = function(message) {
+  process.stdout.write(message)
+}
+
+
+Code.prototype.highlight = function() {
+  this.options.highlight = (this.options.highlight || [])
+    .concat(make_array(arguments))
   return this
 }
 
 
-Code.prototype.line = function() {
+Code.prototype.max_columns = function(max) {
+  this.options.max_columns = max
+  return this
+}
+
+
+Code.prototype.slice = function() {
+  this.options.slice = arguments
+
   return this
 }
 
 
 Code.prototype.mark = function(line, column) {
+  var mark
+  if (column >= 0 && column <= this.lines[line].length - 1) {
+    mark = {
+      line: line,
+      column: column
+    }
+  }
+
+  this.options.mark = mark
+
   return this
 }

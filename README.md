@@ -25,8 +25,9 @@ $ npm install print-code --save
 var code = require('print-code');
 code(content)
   .line(10, 14)
-  .highlight(line, column)
-  .mark(12, column)
+  .max_columns(78)
+  .highlight(12)
+  .arrow_mark(12, column)
   .print()
 ```
 
