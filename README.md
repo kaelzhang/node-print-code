@@ -57,6 +57,14 @@ code(content).slice(10, 11);         // will print line 10
 
 Specify which line number(s) should be highlighted.
 
+- line `Number` The number of code line, starts from `1`
+
+#### .max_columns(max)
+
+Limit the max columns to be printed.
+
+- max `Number=` default to the max columns of the current terminal.
+
 #### .arrow_mark(line, column)
 
 Set a mark, and draw an arrow mark to the target coordinate (line, column).
@@ -64,6 +72,10 @@ Set a mark, and draw an arrow mark to the target coordinate (line, column).
 #### .get()
 
 Get the formated result content.
+
+#### .print()
+
+`console.log` the formated result content.
 
 ## License
 
