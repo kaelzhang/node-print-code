@@ -4,104 +4,9 @@ module.exports = code
 code.Code = Code
 code.generate = generate
 
-const chalk = require('chalk')
-const set = require('set-options')
-const make_array = require('make-array')
-
-
-// @param {Object} options
-// - line: [from, to]
-// - mark: []
-// - highlight: []
-function generate (content, options) {
-  var lines = content.split('\n')
-  
-
-  
-
-  var MAX_COLUMNS = options.column_max
-  
-  var message = 
-    lines
-    .slice(line_start, line_end)
-    .map(function (line, index) {
-      // line number
-      var no = index + line_start
-      var no_length = (no + '').length
-      var mark = ''
-      var column = matched.column
-      var start = 0
-      var length = line.length
-      var end = length
-
-      if (length > MAX_COLUMNS) {
-        // If is the current line, 
-        if (matched.line === no) {
-          // at least, we should display `url(url)`
-          //                              ----
-          start = Math.max(0, matched.column - 4)
-        } else {
-          start = 0
-        }
-
-        end = Math.min(
-          line.length,
-          Math.max(
-            matched.column + matched.match.length + 4,
-            length
-          )
-        )
-      }
-
-      // Handle ellipsis
-      end = Math.min(
-        end,
-        // ... url
-        MAX_COLUMNS + start - (
-            start === 0
-              ? 0
-              // ...(whitespace)
-              : 4
-          ) - (
-            end === length
-              ? 0
-              : 4
-          )
-      )
-
-      var caret = start === 0
-        ? column
-        // '... url('
-        : 8
-
-      var line_string = (
-          start === 0
-           ? ''
-           : '... '
-        ) 
-      + line.slice(start, end)
-      + (
-          end === length
-            ? ''
-            : ' ...'
-        )
-
-      if (matched.line === no) {
-        mark = '\n'
-          // -------^
-          // 5: line no
-          // 1: |
-          // 1: whitespace
-          + Array(7 + 1 + caret).join('-') + '^  '
-          + 'column: ' + column
-      }
-
-      
-    })
-    .join('\n')
-
-  return message
-}
+var chalk = require('chalk')
+var set = require('set-options')
+var make_array = require('make-array')
 
 
 function code (content) {
@@ -132,13 +37,13 @@ Code.prototype.get = function() {
     lines = lines.slice.apply(lines, options.slice)
   }
 
-  return lines.map(
-      line => this._format_line(line.index, line.code)
-    )
+  return lines.map(function (line) {
+    return this._format_line(line.index, line.code)
+  }.bind(this))
 }
 
 
-const DEFAULT_COLOR_PALETTE = {
+var DEFAULT_COLOR_PALETTE = {
   highlight_no: function (str) {
     return chalk.red(str)
   }
@@ -150,27 +55,29 @@ Code.prototype._clean_options = function() {
 
 
 Code.prototype._format_line = function(no, content) {
-  const options = this.options
-  const max_columns = options.max_columns || process.stdout.columns - 1
-
-  // 5: line no
-  // 1: |
-  // 1: whitespace  
-  const max_content = max_columns - 7
+  var options = this.options
+  var max_columns = options.max_columns || process.stdout.columns - 1
   var length = content.length
 
+  var max_content_columns = max_columns === -1
+    ? length
+    // 5: line no
+    // 1: |
+    // 1: whitespace  
+    : max_columns - 7
+
+  // if there is no mark, only manage and slice line string
   if (!options.mark) {
-    
+    content = this._slice_content(content, 0, max_content_columns)
+    return this._format_components(no, content)
   }
 
   
-
-
 }
 
 
-function whitespaces (n) {
-  return Array(n + 1).join(' ')
+function whitespaces (n, joiner) {
+  return Array(n + 1).join(joiner || ' ')
 }
 
 // format cleaned components
@@ -190,6 +97,14 @@ Code.prototype._format_components = function(no, content, mark) {
 }
 
 
+// @param {Number} caret 
+Code.prototype._draw_caret = function(caret, column) {
+  return whitespaces(7 + caret, '-') 
+    + '^  '
+    + 'column: ' + column
+}
+
+
 // format line number
 Code.prototype._format_line_no = function(no) {
   var highlight = this.options.highlight
@@ -202,6 +117,7 @@ Code.prototype._format_line_no = function(no) {
 }
 
 
+// slice line string and manage ellipsis
 // @param {Number} exp_length The expected length of the result
 Code.prototype._slice_content = function(content, start, exp_length) {
   var length = content.length

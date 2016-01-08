@@ -53,17 +53,17 @@ code(content).line(10, 9);          // will only print line 10
 code(content).line(10, 11);         // will print line 10
 ```
 
-#### .highlight(line)
+#### .highlight(line [, ...])
 
-#### .style()
+Specify which line number(s) should be highlighted.
 
-#### .mark()
+#### .mark(line, column)
 
-#### .print()
-
-#### .print_line()
+Set a mark, and draw an arrow to the target coordinate (line, column).
 
 #### .get()
+
+Get the formated result content.
 
 ## License
 
