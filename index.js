@@ -7,7 +7,8 @@ var chalk = require('chalk')
 var set = require('set-options')
 var make_array = require('make-array')
 
-/////////////////////////////////////////////////////////////////////////////////////////////
+//       1         2         3         4         5         6         7
+//34567890123456789012345678901234567890123456789012345678901234567890 for testing
 function code (content) {
   return new Code(String(content))
 }
@@ -19,9 +20,14 @@ function Code (content) {
     .map(function (code, index) {
       return {
         code: code,
-        index: index
+        no: index + 1
       }
     })
+
+  this.codes.unshift({
+    code: '',
+    no: 0
+  })
 
   this.options = {}
 }
@@ -37,9 +43,13 @@ Code.prototype.get = function() {
     lines = lines.slice.apply(lines, options.slice)
   }
 
+  if (lines[0].no === 0) {
+    lines.shift()
+  }
+
   return lines
     .map(function (line) {
-      return this._format_line(line.index, line.code)
+      return this._format_line(line.no, line.code)
     }.bind(this))
     .join('\n')
 }
@@ -71,7 +81,7 @@ Code.prototype._format_line = function(no, content) {
 
   var max_content_columns = max_columns === -1
     ? length
-    : max_columns - LINE_NO_SPAN_LENGTH
+    : max_columns
 
   var mark = options.mark
 
@@ -83,14 +93,23 @@ Code.prototype._format_line = function(no, content) {
 
   var mark_column = mark.column
   var offset = parseInt(max_content_columns / 2)
-  var start = Math.max(0, mark_column - offset)
-  var caret_pos = start === 0
-    ? mark_column
-    : mark_column - offset
+  var start = Math.max(
+    0,
+    Math.min(
+      // try to put mark to the middle of the code slice
+      mark_column - offset,
+      // but we don't want any unnecessary ellipsis at the end
+      length - max_content_columns
+    )
+  )
+  var caret_pos = mark_column - start
+  if (start > 0) {
+    caret_pos += ELLIPSIS_LENGTH
+  }
 
   var mark_string = this._draw_caret(caret_pos, mark_column)
 
-  content = this._slice_content(content, 0, max_content_columns)
+  content = this._slice_content(content, start, max_content_columns)
   return this._format_components(no, content, mark_string)
 }
 
@@ -118,7 +137,8 @@ Code.prototype._format_components = function(no, content, mark) {
 
 // @param {Number} caret 
 Code.prototype._draw_caret = function(caret, column) {
-  return whitespaces(LINE_NO_SPAN_LENGTH + caret, '-')
+  // caret starts with 1, so minus 1
+  return whitespaces(LINE_NO_SPAN_LENGTH + caret - 1, '-')
     + '^  '
     + 'column: ' + column
 }
@@ -152,13 +172,12 @@ Code.prototype._slice_content = function(content, start, exp_length) {
   }
 
   if (start > 0) {
-
     // ...(whitespace)
     slice_length -= ELLIPSIS_LENGTH
     result = '... ' + result
   }
 
-  if (start + exp_length > length) {
+  if (start + exp_length < length) {
     slice_length -= ELLIPSIS_LENGTH
     result += ' ...'
   }
