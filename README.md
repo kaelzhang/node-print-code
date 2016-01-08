@@ -24,14 +24,14 @@ $ npm install print-code --save
 ```js
 var code = require('print-code');
 code(content)
-  .line(10, 14)
+  .slice(10, 14)
   .max_columns(78)
   .highlight(12)
   .arrow_mark(12, column)
   .print()
 ```
 
-#### .line([from] [, to])
+#### .slice([from] [, to])
 
 Specify which lines should be printed.
 
@@ -39,27 +39,27 @@ Specify which lines should be printed.
 - **to** `Number=` If not specified, it will only print the line of `from`
 
 ```js
-code(content).line().print();       // print all code
-code(content).line(10).print();     // print line 10
-code(content).line(10, 20).print(); // print lines from [10, 20)
+code(content).slice().print();       // print all code
+code(content).slice(10).print();     // print line 10
+code(content).slice(10, 20).print(); // print lines from [10, 20)
 ```
 
 Special cases:
 
 ```js
-code(content).line(-1, 10).print(); // will print lines from [0, 10)
-code(content).line(0, -1).print();  // will print lines except for the last line.
-code(content).line(10, 9);          // will only print line 10
-code(content).line(10, 11);         // will print line 10
+code(content).slice(-1, 10).print(); // will print lines from [0, 10)
+code(content).slice(0, -1).print();  // will print lines except for the last line.
+code(content).slice(10, 9);          // will only print line 10
+code(content).slice(10, 11);         // will print line 10
 ```
 
 #### .highlight(line [, ...])
 
 Specify which line number(s) should be highlighted.
 
-#### .mark(line, column)
+#### .arrow_mark(line, column)
 
-Set a mark, and draw an arrow to the target coordinate (line, column).
+Set a mark, and draw an arrow mark to the target coordinate (line, column).
 
 #### .get()
 
