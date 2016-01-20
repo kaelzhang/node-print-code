@@ -24,11 +24,22 @@ $ npm install print-code --save
 ```js
 var code = require('print-code');
 code(content)
-  .slice(10, 14)
-  .max_columns(78)
-  .highlight(12)
-  .arrow_mark(12, column)
+  .highlight(4)
+  .slice(1, 6)
+  .max_columns(68)
+  .arrow_mark(4, 10)
   .print()
+```
+
+And then the output might be (Line No 4 is red):
+
+```
+    1| 'use strict';
+    2|
+    3| module.exports = code
+    4| code.Code = Code
+----------------^ column: 10
+    5|
 ```
 
 #### .slice([from] [, to])

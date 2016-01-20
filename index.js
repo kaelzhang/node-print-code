@@ -139,7 +139,7 @@ Code.prototype._format_components = function(no, content, mark) {
 Code.prototype._draw_caret = function(caret, column) {
   // caret starts with 1, so minus 1
   return whitespaces(LINE_NO_SPAN_LENGTH + caret - 1, '-')
-    + '^  '
+    + '^ '
     + 'column: ' + column
 }
 

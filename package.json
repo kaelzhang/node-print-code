@@ -1,6 +1,6 @@
 {
   "name": "print-code",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Print visualized slice of code from its content, line and column for CLI",
   "main": "index.js",
   "scripts": {
